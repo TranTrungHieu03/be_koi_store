@@ -3,6 +3,8 @@ name: Compose Docker Cloud Project
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   docker-compose:
@@ -11,6 +13,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      
+
       - name: Run Docker Compose
         run: docker compose -f docker-compose.yaml up --build -d
