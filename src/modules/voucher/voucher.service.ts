@@ -6,22 +6,20 @@ export class VoucherService {
         return Voucher.findAll();
     }
 
-    static async getVoucherByCode(code: string): Promise<Voucher | null> {
-        try {
-            return await Voucher.findOne({
-                where: {
-                    code
-                }
-            })
-        } catch (e: any) {
-            throw Error(e.message || "Something went wrong.");
-        }
-    }
+
 
     static async create(data: VoucherCreationAttributes): Promise<Voucher | null> {
         try {
             return await Voucher.create(data
             )
+        } catch (e: any) {
+            throw Error(e.message || "Something went wrong.");
+        }
+    }
+
+    static async findByCode(code: string): Promise<Voucher | null> {
+        try {
+            return await Voucher.findOne({where: {code}})
         } catch (e: any) {
             throw Error(e.message || "Something went wrong.");
         }

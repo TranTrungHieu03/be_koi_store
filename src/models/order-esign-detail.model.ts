@@ -8,25 +8,26 @@ import sequelize from "../config/db";
 export interface OrderEsignDetailAttributes {
     orderEsignDetailId: number,
     fishId: number
-    packageId: number
     orderEsignId: number
     quantity: number,
     orderStatus: EsignStatus
-    initPrice: number
+    initPrice: number;
+    numberOfHealthCheck: number
 }
 
-export interface OrderEsignDetailCreationAttributes extends Optional<OrderEsignDetailAttributes, "orderEsignDetailId" | "packageId" | "fishId" | "initPrice"> {
+export interface OrderEsignDetailCreationAttributes extends Optional<OrderEsignDetailAttributes, "orderEsignDetailId" | "fishId" | "initPrice"> {
 
 }
 
 class OrderEsignDetail extends Model<OrderEsignDetailAttributes, OrderEsignDetailCreationAttributes> implements OrderEsignDetailAttributes {
     public orderEsignDetailId!: number;
     public fishId!: number;
-    public packageId!: number;
     public orderEsignId!: number;
     public quantity!: number;
     public orderStatus!: EsignStatus;
-    public initPrice!: number
+    public initPrice!: number;
+    public numberOfHealthCheck!: number
+
 }
 
 OrderEsignDetail.init({
@@ -41,14 +42,6 @@ OrderEsignDetail.init({
         references: {
             model: Fish,
             key: "fishId"
-        }
-    },
-    packageId: {
-        type: DataTypes.INTEGER.UNSIGNED,
-        allowNull: true,
-        references: {
-            model: Package,
-            key: "packageId"
         }
     },
     orderEsignId: {
@@ -70,6 +63,10 @@ OrderEsignDetail.init({
     initPrice: {
         type: DataTypes.FLOAT,
         allowNull: true
+    },
+    numberOfHealthCheck: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
     }
 }, {
     sequelize, tableName: "order-esign-details"
@@ -77,14 +74,10 @@ OrderEsignDetail.init({
 
 OrderEsignDetail.belongsTo(OrderEsign, {foreignKey: "orderEsignId"});
 OrderEsign.hasMany(OrderEsignDetail, {
-    foreignKey: "orderEsignId"
+    foreignKey: "orderEsignId", as: "orderDetails"
 });
 
 OrderEsignDetail.hasOne(Fish, {foreignKey: "fishId"});
 Fish.belongsTo(OrderEsignDetail, {foreignKey: "fishId"});
 
-OrderEsignDetail.hasOne(Package, {
-    foreignKey: "packageId",
-});
-Package.belongsTo(OrderEsignDetail, {foreignKey: "packageId"});
 export default OrderEsignDetail;

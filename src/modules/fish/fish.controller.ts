@@ -1,11 +1,10 @@
 import {NextFunction, Request, Response} from "express";
 import {FishService} from "./fish.service";
-import ResponseDTO from "../../helpers/response";
-import Fish, {FishCreationAttributes} from "../../models/fish.model";
+import fishModel, {FishCreationAttributes} from "../../models/fish.model";
 import {badRequest, created, internalServerError, ok} from "../../utils/util";
-import exp from "node:constants";
 import {PoolService} from "../pool/pool.service";
-import fishModel from "../../models/fish.model";
+import sequelize from "../../config/db";
+import {PoolStatus} from "../../contants/enums";
 
 export const getAllFishes = async (_req: Request, res: Response, next: NextFunction) => {
     try {
@@ -26,13 +25,18 @@ export const getFishById = async (req: Request, res: Response, next: NextFunctio
 };
 
 export const createFish = async (req: Request, res: Response, next: NextFunction) => {
+    const t = await sequelize.transaction();
     try {
         const fishData: FishCreationAttributes = req.body;
 
         const pool = await PoolService.getOrigin(fishData.poolId)
         const typePoolNeed = fishData.unique ? "specific" : "general"
+        if (!pool) {
+            badRequest(res, "This pool not exist")
+            return
+        }
 
-        if (pool && (pool.origin !== fishData.origin || pool.type !== typePoolNeed)) {
+        if (pool.origin !== fishData.origin || pool.type !== typePoolNeed) {
             badRequest(res, "This fish cannot live in this pool")
             return
         }
@@ -41,9 +45,27 @@ export const createFish = async (req: Request, res: Response, next: NextFunction
             return
         }
 
-        const newFish = await FishService.createFish({...fishData, remainQuantity: fishData.initQuantity});
+
+        const currentQuantityOfPool = await FishService.getQuantityOfPoolId(fishData.poolId);
+        if (fishData.initQuantity + pool.currentQuantity > pool.maxQuantity) {
+            badRequest(res, "Too much fishes in this pool", fishData);
+            return
+        }
+        if (!fishData.unique || pool.maxQuantity <= (currentQuantityOfPool + fishData.initQuantity)) {
+            pool.status = PoolStatus.Inactive;
+        }
+        pool.currentQuantity += fishData.initQuantity;
+        await pool.save({transaction: t})
+        const newFish = await FishService.createFish({
+            ...fishData,
+            remainQuantity: fishData.initQuantity,
+            soldQuantity: 0,
+            ownerId: undefined
+        }, t);
+        await t.commit()
         created(res, "Created Fish", newFish);
     } catch (e) {
+        await t.rollback()
         next(e);
     }
 };

@@ -12,6 +12,7 @@ interface PoolAttributes {
     type: PoolType;
     origin: number;
     status: PoolStatus;
+    currentQuantity: number;
 }
 
 export interface PoolCreationAttributes extends Optional<PoolAttributes, "poolId"> {
@@ -24,6 +25,7 @@ class Pool extends Model<PoolAttributes, PoolCreationAttributes> implements Pool
     public type!: PoolType;
     public origin!: number;
     public maxQuantity!: number;
+    public currentQuantity!: number;
     public code!: string;
     public status!: PoolStatus;
 }
@@ -69,6 +71,10 @@ Pool.init(
             type: DataTypes.ENUM(...Object.values(PoolStatus)),
             defaultValue: PoolStatus.Available,
         },
+        currentQuantity: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        }
     },
     {
         tableName: "pools",

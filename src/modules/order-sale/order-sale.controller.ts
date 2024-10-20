@@ -12,6 +12,7 @@ import sequelize from "../../config/db";
 import {getDiscountPackages} from "../../utils/discount-package";
 import {formatDate} from "../../utils/formatDate";
 import {AuthRequest} from "../../types/auth-request";
+import {PoolService} from "../pool/pool.service";
 
 export const getAllOrderSale = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -33,7 +34,7 @@ export const createOrderSale = async (req: AuthRequest, res: Response, next: Nex
         }
 
 
-        const voucher = await VoucherService.getVoucherByCode(data.voucherCode);
+        const voucher = await VoucherService.findByCode(data.voucherCode);
         if (!voucher && data.voucherCode.trim() != '') {
             badRequest(res, "Voucher not found", data)
             return
@@ -74,7 +75,7 @@ export const createOrderSale = async (req: AuthRequest, res: Response, next: Nex
             for (let fish of fishList) {
 
                 const currentFish = await FishService.getPrice(fish.id);
-                if (currentFish?.status !== Status.Active || !currentFish.unique) {
+                if ((currentFish?.status !== Status.Active && currentFish?.status !== Status.Esign) || !currentFish.unique) {
                     await t.rollback();
                     badRequest(res, `Fish ${currentFish?.name} is not available for unique sale `);
                     return
@@ -90,7 +91,9 @@ export const createOrderSale = async (req: AuthRequest, res: Response, next: Nex
                     orderSaleId: newOrderSale.orderSaleId
                 }, t)
 
-                await FishService.updateStatusAndQuantity(fish.id, fish.quantity, Status.Sold, t)
+                await FishService.updateStatusAndQuantity(fish.id, fish.quantity, Status.Sold, t);
+
+                await PoolService.updatePoolAfterSoldOut(currentFish.poolId, 1, t)
             }
         }
         if (packageList.length > 0) {
@@ -113,9 +116,11 @@ export const createOrderSale = async (req: AuthRequest, res: Response, next: Nex
                     updateStatus = Status.Sold
                 }
 
-                await FishService.updateStatusAndQuantity(container.id, container.quantity, updateStatus, t)
 
-
+                await FishService.updateStatusAndQuantity(container.id, container.quantity, updateStatus, t,)
+                console.log(container.quantity)
+                console.log(await PoolService.getPoolById(currentFish.poolId));
+                await PoolService.updatePoolAfterSoldOut(currentFish.poolId, container.quantity, t)
                 const discount = getDiscountPackages(container.quantity)
                 cost += currentFish?.price * container.quantity * discount
 
@@ -132,7 +137,7 @@ export const createOrderSale = async (req: AuthRequest, res: Response, next: Nex
                     quantity: 1,
                     status: OrderStatus.Processing,
                     packageId: newPackage.packageId,
-                    initPrice: currentFish?.price ?? 0,
+                    initPrice: currentFish?.price * container.quantity * discount,
                     orderSaleId: newOrderSale.orderSaleId
                 }, t)
             }

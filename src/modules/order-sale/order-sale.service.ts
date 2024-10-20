@@ -1,6 +1,6 @@
 import OrderSale, {OrderSaleCreateAttributes, OrderSaleFullAttributes} from "../../models/order-sale.model";
 import OrderSaleDetail, {OrderSaleDetailCreationAttributes} from "../../models/order-sale-detail.model";
-import {or, Transaction} from "sequelize";
+import { Transaction} from "sequelize";
 import {OrderStatus} from "../../contants/enums";
 
 export class OrderSaleService {
@@ -71,7 +71,6 @@ export class OrderSaleService {
 
     static async updateStatusForTotalOrderDetail(orderSaleId: number, status: OrderStatus, transaction: Transaction) {
         try {
-            console.log(orderSaleId, status)
             const [updateRows] = await OrderSaleDetail.update({
                 status
             }, {

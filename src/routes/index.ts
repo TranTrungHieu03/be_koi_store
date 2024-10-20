@@ -9,6 +9,7 @@ import fishTypeRoute from "./fish-type.route";
 import authRoutes from "./auth.route";
 import poolRoute from "./pool.route";
 import orderEsignRoute from "./order-esign.route";
+import feeRoute from "./fee.route";
 import originFishRoute from "./origin-fish.route";
 
 const mainRoutes: Router = Router();
@@ -28,5 +29,6 @@ mainRoutes.use("/documents", documentRoute);
 mainRoutes.use("/vouchers", voucherRoute);
 mainRoutes.use("/packages", packageRoute);
 mainRoutes.use("/pools", poolRoute);
+mainRoutes.use("/fees", feeRoute);
 
 export default mainRoutes;

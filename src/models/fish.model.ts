@@ -1,6 +1,6 @@
 import {DataTypes, Model, Optional} from "sequelize";
 import sequelize from "../config/db";
-import {FishStatus, Status, Type} from "../contants/enums";
+import {FishStatus, Status} from "../contants/enums";
 import OriginFish from "./origin-fish.model";
 import Pool from "./pool.model";
 import User from "./user.model";
@@ -14,23 +14,24 @@ interface FishAttributes {
     tag: string;
     status: Status;
     price: number;
-    type: Type;
+    type: number;
     sex: boolean;
     origin: number;
     age: number;
     weight: number;
     character: string;
-    foodIntake: string;
+    foodIntake: number;
     screeningRate: number;
     unique: boolean;
     poolId: number;
     initQuantity: number;
     remainQuantity: number;
     soldQuantity: number;
-    healthStatus: FishStatus
+    healthStatus: FishStatus,
+    ownerId: number
 }
 
-export interface FishCreationAttributes extends Optional<FishAttributes, "fishId"> {
+export interface FishCreationAttributes extends Optional<FishAttributes, "fishId" |"ownerId"> {
 }
 
 class Fish extends Model<FishAttributes, FishCreationAttributes> implements FishAttributes {
@@ -39,7 +40,7 @@ class Fish extends Model<FishAttributes, FishCreationAttributes> implements Fish
     public age!: number;
     public character!: string;
     public features!: string;
-    public foodIntake!: string;
+    public foodIntake!: number;
     public image!: string;
     public origin!: number;
     public poolId!: number;
@@ -48,14 +49,15 @@ class Fish extends Model<FishAttributes, FishCreationAttributes> implements Fish
     public sex!: boolean;
     public status!: Status;
     public tag!: string;
-    public type!: Type;
+    public type!: number;
     public unique!: boolean;
     public weight!: number;
     public quantity!: number;
     public initQuantity!: number;
     public remainQuantity!: number;
     public soldQuantity!: number;
-   public healthStatus!: FishStatus
+    public healthStatus!: FishStatus
+    public ownerId!: number
 }
 
 Fish.init(
@@ -146,16 +148,24 @@ Fish.init(
             allowNull: false,
         },
         foodIntake: {
-            type: DataTypes.STRING(128),
-            allowNull: false,
+            type: DataTypes.FLOAT,
+            allowNull: true,
         },
         unique: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
         },
-        healthStatus:{
+        healthStatus: {
             type: DataTypes.ENUM(...Object.values(FishStatus)),
             defaultValue: FishStatus.Healthy
+        },
+        ownerId: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            allowNull: true,
+            references: {
+                model: User,
+                key: "userId",
+            }
         }
     },
     {
@@ -167,9 +177,9 @@ Fish.belongsTo(User, {foreignKey: "ownerId"});
 User.hasMany(Fish, {foreignKey: "ownerId"});
 
 Fish.belongsTo(Pool, {foreignKey: "poolId"});
-Pool.hasMany(Fish, {
-    foreignKey: "poolId",
-});
+// Pool.hasMany(Fish, {
+//     foreignKey: "poolId",
+// });
 OriginFish.hasMany(Fish, {foreignKey: "origin"});
 Fish.belongsTo(OriginFish, {foreignKey: "origin"});
 
