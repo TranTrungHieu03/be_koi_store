@@ -4,22 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3caa785c-b9bf-422c-a408-2330ce2e755a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/utils/countDate.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/estimateTypeFish.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/getDiscountLongDuration.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/contants/enums.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/contants/enums.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dto/order-esign/order-esign.request.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/dto/order-esign/order-esign.request.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/middleware/auth.middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/middleware/auth.middleware.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/order-esign-detail.model.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/order-esign-detail.model.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/order-esign.model.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/order-esign.model.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/fee/fee.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/fee/fee.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/fish/fish.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/fish/fish.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/order-esign/order-esign.controller.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/order-esign/order-esign.controller.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/order-esign/order-esign.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/order-esign/order-esign.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/routes/order-esign.route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/order-esign.route.ts" afterDir="false" />
-    </list>
+    <list default="true" id="3caa785c-b9bf-422c-a408-2330ce2e755a" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -120,7 +105,7 @@
       <workItem from="1728986961776" duration="12542000" />
       <workItem from="1729225874089" duration="16436000" />
       <workItem from="1729253202087" duration="14187000" />
-      <workItem from="1729409391618" duration="21771000" />
+      <workItem from="1729409391618" duration="22382000" />
     </task>
     <servers />
   </component>
