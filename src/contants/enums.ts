@@ -5,6 +5,10 @@ export enum Status {
     Esign = "esign",
     SoldEsign = "sold-esign",
     PendingEsign = "pending-esign",
+    PendingCare="pending-care",
+    Care="care",
+    DoneCare = "done-care",
+    WaitingReceive="waiting-receive",
 }
 
 export enum Role {
@@ -29,7 +33,8 @@ export enum EsignStatus {
     Processing = 'processing',
     Shipping = 'shipping',
     Pending = 'pending',
-    Paid = 'paid'
+    Paid = 'paid',
+    Done ="done"
 }
 
 export enum FishStatus {
@@ -51,4 +56,10 @@ export enum OrderStatus {
     Processing = 'processing',
     Accident = 'accident',
     Paid = 'paid'
+}
+
+export enum OrderEsginType {
+    OnlineSale="online-sale",
+    OfflineSale="offline-sale",
+    Care ="care"
 }

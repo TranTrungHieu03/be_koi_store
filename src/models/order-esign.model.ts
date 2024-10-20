@@ -1,4 +1,4 @@
-import {EsignStatus} from "../contants/enums";
+import {EsignStatus, OrderEsginType} from "../contants/enums";
 import {DataTypes, Model, Optional} from "sequelize";
 import User from "./user.model";
 import sequelize from "../config/db";
@@ -12,13 +12,16 @@ interface OrderEsignAttributes {
     userId: number;
     receiveDate: Date;
     expiryDate: Date;
+    type: OrderEsginType;
+    discount: number,
+    finalPrice: number
 }
 
 export interface OrderEsignFullAttributes extends OrderEsignAttributes {
     orderDetails: OrderEsignDetailAttributes[]
 }
 
-export interface OrderEsignCreationAttributes extends Optional<OrderEsignAttributes, "orderEsignId" | "totalPrice" | "staffId"> {
+export interface OrderEsignCreationAttributes extends Optional<OrderEsignAttributes, "orderEsignId" | "totalPrice" | "staffId" | "discount" | "finalPrice"> {
 }
 
 class OrderEsign extends Model<OrderEsignAttributes, OrderEsignCreationAttributes> implements OrderEsignAttributes {
@@ -29,7 +32,10 @@ class OrderEsign extends Model<OrderEsignAttributes, OrderEsignCreationAttribute
     public userId!: number;
     public receiveDate!: Date;
     public expiryDate!: Date;
-    public orderDetails!: OrderEsignDetailAttributes[]
+    public orderDetails!: OrderEsignDetailAttributes[];
+    public type!: OrderEsginType;
+    public discount!: number;
+    public finalPrice!: number;
 }
 
 OrderEsign.init({
@@ -69,6 +75,18 @@ OrderEsign.init({
     expiryDate: {
         type: DataTypes.DATE,
         defaultValue: new Date(new Date().getDate() + 3)
+    },
+    type: {
+        type: DataTypes.ENUM(...Object.values(OrderEsginType)),
+        defaultValue: OrderEsginType.Care
+    },
+    discount: {
+        type: DataTypes.FLOAT,
+        allowNull: true
+    },
+    finalPrice: {
+        type: DataTypes.FLOAT,
+        allowNull: true
     }
 }, {
     tableName: "order-esigns",

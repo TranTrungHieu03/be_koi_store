@@ -1,5 +1,5 @@
 import Fish, {FishCreationAttributes} from "../../models/fish.model";
-import {Status} from "../../contants/enums";
+import {FishStatus, Status} from "../../contants/enums";
 import {PackageCreationAttributes} from "../../models/package.model";
 import sequelize, {Transaction} from "sequelize";
 
@@ -61,14 +61,28 @@ export class FishService {
 
     static async updateStatus(fishId: number, status: Status, transaction: Transaction): Promise<boolean> {
         try {
-            const [updateRows] = await Fish.update({
-                status
-            }, {
-                where: {
-                    fishId: fishId
-                }, transaction
-            });
-            return updateRows > 0;
+            if (status !== Status.DoneCare){
+                const [updateRows] = await Fish.update({
+                    status
+                }, {
+                    where: {
+                        fishId: fishId
+                    }, transaction
+                });
+                return updateRows > 0;
+            }else {
+                const [updateRows] = await Fish.update({
+                    status,
+                    remainQuantity: sequelize.literal(`remainQuantity - 1`),
+                }, {
+                    where: {
+                        fishId: fishId
+                    }, transaction
+                });
+                return updateRows > 0;
+            }
+
+
         } catch (e: any) {
             throw Error(e.message || "Something went wrong.");
         }
@@ -91,12 +105,12 @@ export class FishService {
         }
     }
 
-    static async update(fishId: number, fishData: FishCreationAttributes): Promise<boolean> {
+    static async update(fishId: number, fishData: FishCreationAttributes, transaction?: Transaction): Promise<boolean> {
         try {
             const [updateRows] = await Fish.update(fishData, {
                 where: {
                     fishId: Number(fishId)
-                }
+                }, transaction
             });
             return updateRows > 0;
         } catch (e: any) {
@@ -135,9 +149,9 @@ export class FishService {
         }
     }
 
-    static async updateFish(fishId: number, data: FishCreationAttributes): Promise<boolean> {
+    static async updateFish(fishId: number, data: FishCreationAttributes, transaction?:Transaction): Promise<boolean> {
         try {
-            const [updateRows] = await Fish.update(data, {where: {fishId}});
+            const [updateRows] = await Fish.update(data, {where: {fishId},transaction});
             return updateRows > 0
         } catch (e: any) {
             throw Error(e.message || "Something went wrong.");

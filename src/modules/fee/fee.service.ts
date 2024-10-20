@@ -8,4 +8,20 @@ export class FeeService {
             throw Error(e.message || "Something went wrong.");
         }
     }
+
+    static async getAll() {
+        try {
+            return await Fee.findAll()
+        } catch (e: any) {
+            throw Error(e.message || "Something went wrong.");
+        }
+    }
+
+    static async getById(feeId: number) {
+        try {
+            return await Fee.findByPk(feeId)
+        } catch (e: any) {
+            throw Error(e.message || "Something went wrong.");
+        }
+    }
 }
