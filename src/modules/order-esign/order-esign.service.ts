@@ -3,6 +3,7 @@ import OrderEsignDetail, {OrderEsignDetailCreationAttributes} from "../../models
 import {Transaction} from "sequelize";
 import {EsignStatus, Status} from "../../contants/enums";
 import {FishService} from "../fish/fish.service";
+import Fish from "../../models/fish.model";
 
 export class OrderEsignService {
     static async getAll(): Promise<OrderEsign[]> {
@@ -24,7 +25,29 @@ export class OrderEsignService {
                     {
                         model: OrderEsignDetail,
                         as: "orderDetails",
-                        required: true
+                        required: true,
+                        include: [
+                            {
+                                model: Fish,
+                                as: "fish"
+                            }
+
+                        ]
+                    }
+                ]
+            })
+        } catch (e: any) {
+            throw Error(e.message || "Something went wrong.");
+        }
+    }
+    static async getShortById(orderEsignId: number): Promise<OrderEsignFullAttributes | null> {
+        try {
+            return await OrderEsign.findByPk(orderEsignId, {
+                include: [
+                    {
+                        model: OrderEsignDetail,
+                        as: "orderDetails",
+                        required: true,
                     }
                 ]
             })

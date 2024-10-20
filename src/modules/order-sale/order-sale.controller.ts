@@ -80,6 +80,11 @@ export const createOrderSale = async (req: AuthRequest, res: Response, next: Nex
                     badRequest(res, `Fish ${currentFish?.name} is not available for unique sale `);
                     return
                 }
+                if (fish.quantity > 1){
+                    await t.rollback();
+                    badRequest(res, `Fish ${currentFish?.name} is unique `);
+                    return
+                }
                 cost += currentFish?.price;
 
 
@@ -118,8 +123,6 @@ export const createOrderSale = async (req: AuthRequest, res: Response, next: Nex
 
 
                 await FishService.updateStatusAndQuantity(container.id, container.quantity, updateStatus, t,)
-                console.log(container.quantity)
-                console.log(await PoolService.getPoolById(currentFish.poolId));
                 await PoolService.updatePoolAfterSoldOut(currentFish.poolId, container.quantity, t)
                 const discount = getDiscountPackages(container.quantity)
                 cost += currentFish?.price * container.quantity * discount

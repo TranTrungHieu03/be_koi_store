@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3caa785c-b9bf-422c-a408-2330ce2e755a" name="Changes" comment="" />
+    <list default="true" id="3caa785c-b9bf-422c-a408-2330ce2e755a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/order-esign-detail.model.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/order-esign-detail.model.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/order-esign/order-esign.controller.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/order-esign/order-esign.controller.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/order-esign/order-esign.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/order-esign/order-esign.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/order-sale/order-sale.controller.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/order-sale/order-sale.controller.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -51,7 +57,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "hieu",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "E:/FALL2024/MMA/project",
     "node.js.detected.package.eslint": "true",

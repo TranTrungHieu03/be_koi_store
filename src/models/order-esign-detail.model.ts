@@ -26,7 +26,9 @@ class OrderEsignDetail extends Model<OrderEsignDetailAttributes, OrderEsignDetai
     public quantity!: number;
     public orderStatus!: EsignStatus;
     public initPrice!: number;
-    public numberOfHealthCheck!: number
+    public numberOfHealthCheck!: number;
+    public fish!: Fish
+
 
 }
 
@@ -77,7 +79,7 @@ OrderEsign.hasMany(OrderEsignDetail, {
     foreignKey: "orderEsignId", as: "orderDetails"
 });
 
-OrderEsignDetail.hasOne(Fish, {foreignKey: "fishId"});
+OrderEsignDetail.hasOne(Fish, {foreignKey: "fishId", as :"fish"});
 Fish.belongsTo(OrderEsignDetail, {foreignKey: "fishId"});
 
 export default OrderEsignDetail;
