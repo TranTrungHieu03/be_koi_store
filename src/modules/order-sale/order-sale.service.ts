@@ -1,7 +1,8 @@
 import OrderSale, {OrderSaleCreateAttributes, OrderSaleFullAttributes} from "../../models/order-sale.model";
 import OrderSaleDetail, {OrderSaleDetailCreationAttributes} from "../../models/order-sale-detail.model";
-import { Transaction} from "sequelize";
+import {Op, Transaction} from "sequelize";
 import {OrderStatus} from "../../contants/enums";
+import Order from "../../models/order-sale.model";
 
 export class OrderSaleService {
     static async getAllOrderSales(): Promise<OrderSale[]> {
@@ -129,6 +130,32 @@ export class OrderSaleService {
                 );
             }
             return updateRows > 0;
+        } catch
+            (e: any) {
+            new Error(e.message || "Something went wrong.");
+        }
+    }
+
+    static async cancelOrder() {
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+        try {
+
+            // const [affectedRows] = await OrderSale.update(
+            //     {status: OrderStatus.Cancel},
+            //     {
+            //         where: {
+            //             status: 'processing',
+            //             createdAt: {
+            //                 [Op.lte]: oneHourAgo,
+            //             },
+            //         },
+            //     }
+            // );
+            //
+            // if (affectedRows > 0) {
+            //     console.log(`${affectedRows} is canceled.`);
+            // }
         } catch
             (e: any) {
             new Error(e.message || "Something went wrong.");

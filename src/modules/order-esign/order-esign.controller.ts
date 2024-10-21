@@ -71,7 +71,7 @@ export const createOrderEsign = async (req: Request, res: Response, next: NextFu
                     }, t)
                 }
             }
-        } else if (data.type === OrderEsginType.OnlineSale) {
+        } else if (data.type === OrderEsginType.OnlineSale || data.type ===OrderEsginType.OfflineSale) {
             if (fishList.length > 0) {
                 for (let fish of fishList) {
 

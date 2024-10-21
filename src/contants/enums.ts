@@ -34,7 +34,8 @@ export enum EsignStatus {
     Shipping = 'shipping',
     Pending = 'pending',
     Paid = 'paid',
-    Done ="done"
+    Done ="done",
+    Confirm="confirm"
 }
 
 export enum FishStatus {
@@ -55,7 +56,8 @@ export enum OrderStatus {
     Completed = 'completed',
     Processing = 'processing',
     Accident = 'accident',
-    Paid = 'paid'
+    Paid = 'paid',
+    Cancel='cancel'
 }
 
 export enum OrderEsginType {

@@ -71,7 +71,7 @@ OrderEsignDetail.init({
         defaultValue: 0
     }
 }, {
-    sequelize, tableName: "order-esign-details"
+    sequelize, tableName: "order-esign-details", timestamps: true
 });
 
 OrderEsignDetail.belongsTo(OrderEsign, {foreignKey: "orderEsignId"});
