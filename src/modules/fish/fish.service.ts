@@ -90,6 +90,7 @@ export class FishService {
 
     static async updateStatusAndQuantity(fishId: number, quantity: number, status: Status, transaction: Transaction): Promise<boolean> {
         try {
+            console.log(quantity)
             const [updateRows] = await Fish.update({
                 remainQuantity: sequelize.literal(`remainQuantity - ${quantity}`),
                 soldQuantity: sequelize.literal(`soldQuantity + ${quantity}`),

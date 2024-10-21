@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response} from "express";
 import {badRequest, created, ok} from "../../utils/util";
 import {OrderEsignService} from "./order-esign.service";
-import {EsignStatus, FishStatus, OrderEsginType, OrderStatus, Status} from "../../contants/enums";
+import {EsignStatus, FishStatus, OrderEsginType, PoolStatus, Status} from "../../contants/enums";
 import {OrderEsginRequestCreation} from "../../dto/order-esign/order-esign.request";
 import sequelize from "../../config/db";
 import User from "../../models/user.model";
@@ -12,6 +12,7 @@ import {countDate} from "../../utils/countDate";
 import {estimateTypeFish} from "../../utils/estimateTypeFish";
 import {FeeService} from "../fee/fee.service";
 import {getDiscountLongDuration} from "../../utils/getDiscountLongDuration";
+import {PoolService} from "../pool/pool.service";
 
 
 export const createOrderEsign = async (req: Request, res: Response, next: NextFunction) => {
@@ -70,6 +71,32 @@ export const createOrderEsign = async (req: Request, res: Response, next: NextFu
                     }, t)
                 }
             }
+        } else if (data.type === OrderEsginType.OnlineSale || data.type ===OrderEsginType.OfflineSale) {
+            if (fishList.length > 0) {
+                for (let fish of fishList) {
+
+                    if (!fish.numberOfHealthCheck) {
+                        badRequest(res, "Number of health check is required", data);
+                        await t.rollback()
+                        return;
+                    }
+                    const newFish = await FishService.createFish({
+                        ...fish,
+                        remainQuantity: fish.initQuantity,
+                        price: fish.isNeedEstimated ? -1 : fish.price,
+                        unique: true,
+                        status: Status.PendingEsign
+                    }, t);
+
+                    await OrderEsignService.createEsignDetail({
+                        fishId: newFish.fishId,
+                        quantity: 1,
+                        orderStatus: EsignStatus.Pending,
+                        orderEsignId: newOrderEsign.orderEsignId,
+                        numberOfHealthCheck: fish.numberOfHealthCheck
+                    }, t)
+                }
+            }
         }
 
         await t.commit()
@@ -80,6 +107,7 @@ export const createOrderEsign = async (req: Request, res: Response, next: NextFu
         next(e);
     }
 };
+
 
 export const confirmOrderEsginByCustomer = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const t = await sequelize.transaction();
@@ -157,54 +185,84 @@ export const updateEsginDetailByStaff = async (req: AuthRequest, res: Response, 
             return
         }
         let totalPrice = 0;
-        if (data.type === OrderEsginType.Care) {
-            if (fishList.length > 0) {
-                for (let fish of fishList) {
-                    if (fish.price <= 0) {
-                        badRequest(res, "Price of fish must be greater than 0")
-                        await t.rollback();
-                        return
-                    }
-                    if (!fish.orderEsignDetailId) {
-                        badRequest(res, "Order detail id can not null")
-                        await t.rollback();
-                        return
-                    }
-                    await FishService.update(Number(fish.fishId), {
-                        ...fish
-                    }, t)
+
+        if (fishList.length > 0) {
+            for (let fish of fishList) {
+                if (fish.price <= 0) {
+                    badRequest(res, "Price of fish must be greater than 0")
+                    await t.rollback();
+                    return
+                }
+                if (!fish.orderEsignDetailId) {
+                    badRequest(res, "Order detail id can not null")
+                    await t.rollback();
+                    return
+                }
+                if (!fish.fishId) {
+                    badRequest(res, "Fish id can not null")
+                    await t.rollback();
+                    return
+                }
+
+                await FishService.update(Number(fish.fishId), {
+                    ...fish
+                }, t)
+
+                console.log(fish)
 
 
-                    const typeFishOfWeight = estimateTypeFish(fish.weight)
+                const typeFishOfWeight = estimateTypeFish(fish.weight)
 
-                    const getFee = await FeeService.getById(typeFishOfWeight);
+                const getFee = await FeeService.getById(typeFishOfWeight);
 
-                    const rateHealth = fish.healthStatus == FishStatus.Sick ? 2 : 1;
-                    const currentOrderEsignDetail = await OrderEsignService.getOrderDetailById(fish.orderEsignDetailId!);
-                    if (!currentOrderEsignDetail) {
-                        badRequest(res, "Order esign detail not found")
-                        await t.rollback();
-                        return
-                    }
-
-                    const initPrice = (getFee!.feed * count + getFee!.careFeed * count * rateHealth + getFee!.other + fish.numberOfHealthCheck * getFee!.healthCheck) * 10000
+                const rateHealth = fish.healthStatus == FishStatus.Sick ? 2 : 1;
+                const currentOrderEsignDetail = await OrderEsignService.getOrderDetailById(fish.orderEsignDetailId!);
+                if (!currentOrderEsignDetail) {
+                    badRequest(res, "Order esign detail not found")
+                    await t.rollback();
+                    return
+                }
+                let initPrice = 0
+                if (data.type === OrderEsginType.Care) {
+                    initPrice = (getFee!.feed * count + getFee!.careFeed * count * rateHealth + getFee!.other + fish.numberOfHealthCheck * getFee!.healthCheck) * 10000;
                     await OrderEsignService.updateEsignDetail(fish.orderEsignDetailId!, {
                         ...currentOrderEsignDetail,
                         orderStatus: EsignStatus.Pending,
-                        initPrice
+                        initPrice: fish.price * 0.1
                     }, t)
 
                     totalPrice += initPrice
+                } else if (data.type === OrderEsginType.OnlineSale) {
+                    await OrderEsignService.updateEsignDetail(fish.orderEsignDetailId!, {
+                        ...currentOrderEsignDetail,
+                        orderStatus: EsignStatus.Pending,
+                        initPrice: fish.price * 0.1
+                    }, t)
 
+                    totalPrice += fish.price * 0.1
+                } else if (data.type === OrderEsginType.OfflineSale) {
+                    await OrderEsignService.updateEsignDetail(fish.orderEsignDetailId!, {
+                        ...currentOrderEsignDetail,
+                        orderStatus: EsignStatus.Pending,
+                        initPrice: fish.price * 0.15
+                    }, t)
+
+                    totalPrice += fish.price * 0.15
                 }
-            }
 
+
+            }
         }
+
 
         const getDiscount = getDiscountLongDuration(count);
 
-        console.log(orderEsignId, data.staffId, totalPrice, getDiscount)
-        await OrderEsignService.updateTotalPrice(Number(orderEsignId), Number(data.staffId), totalPrice, getDiscount, totalPrice - totalPrice * getDiscount, t);
+        if (data.type === OrderEsginType.Care) {
+
+            await OrderEsignService.updateTotalPrice(Number(orderEsignId), Number(data.staffId), totalPrice, getDiscount, totalPrice - totalPrice * getDiscount, t);
+        } else {
+            await OrderEsignService.updateTotalPrice(Number(orderEsignId), Number(data.staffId), totalPrice, 0, totalPrice, t);
+        }
 
         await t.commit();
         ok(res, "Waiting confirm from customer")
@@ -246,7 +304,7 @@ export const updateStatusAfterShipping = async (req: AuthRequest, res: Response,
         const orderEsignId = req.params.orderEsignId;
         const {orderStatus, fishStatus, pools} = req.body;
 
-        const currentOrder = await OrderEsignService.getById(Number(orderEsignId));
+        const currentOrder = await OrderEsignService.getShortById(Number(orderEsignId));
         if (!currentOrder) {
             badRequest(res, "Order not found")
             return
@@ -270,12 +328,40 @@ export const updateStatusAfterShipping = async (req: AuthRequest, res: Response,
 
                 if (pools) {
                     const poolList = pools as { fishId: number, poolId: number }[]
-                    const pool = poolList.find((pool) => pool.fishId === fish.fishId);
-                    if (!pool){
+                    const poolId = poolList.find((pool) => pool.fishId === fish.fishId);
+                    console.log(poolId)
+                    if (!poolId) {
                         badRequest(res, "Some fish has not pool")
                         await t.rollback()
                         return
                     }
+                    const pool = await PoolService.getOrigin(poolId.poolId)
+                    const typePoolNeed = currentFish.unique ? "specific" : "general"
+                    if (!pool) {
+                        badRequest(res, "This pool not exist")
+                        return
+                    }
+
+                    if (pool.origin !== currentFish.origin || pool.type !== typePoolNeed) {
+                        badRequest(res, "This currentFish cannot live in this pool")
+                        return
+                    }
+                    if (currentFish.unique && (currentFish.initQuantity !== 1)) {
+                        badRequest(res, "Specific currentFish is unique")
+                        return
+                    }
+
+
+                    const currentQuantityOfPool = await FishService.getQuantityOfPoolId(currentFish.poolId);
+                    if (currentFish.initQuantity + pool.currentQuantity > pool.maxQuantity) {
+                        badRequest(res, "Too much currentFishes in this pool", currentFish);
+                        return
+                    }
+                    if (!currentFish.unique || pool.maxQuantity <= (currentQuantityOfPool + currentFish.initQuantity)) {
+                        pool.status = PoolStatus.Inactive;
+                    }
+                    pool.currentQuantity += currentFish.initQuantity;
+                    await pool.save({transaction: t})
                     await FishService.updateFish(fish.fishId, {
                         ...currentFish,
                         status: fishStatus,

@@ -10,7 +10,7 @@ interface OrderSaleAttributes {
     totalPrice: number;
     voucherId: number;
     buyerId: number;
-    status: OrderStatus
+    status: OrderStatus;
 }
 
 export interface OrderSaleCreateAttributes
@@ -65,6 +65,7 @@ OrderSale.init(
     {
         tableName: "order-sales",
         sequelize,
+        timestamps: true
     }
 );
 
