@@ -82,7 +82,7 @@ export const createOrderSale = async (req: AuthRequest, res: Response, next: Nex
                 }
                 if (fish.quantity > 1){
                     await t.rollback();
-                    badRequest(res, `Fish ${currentFish?.name} is unique `);
+                    badRequest(res, `Fish ${currentFish?.name} is uniquegit git  `);
                     return
                 }
                 cost += currentFish?.price;
