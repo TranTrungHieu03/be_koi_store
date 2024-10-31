@@ -2,6 +2,7 @@ import { NextFunction, Response } from "express";
 import { ok } from "../../utils/util";
 import { UserService } from "./user.service";
 import { AuthRequest } from "../../types/auth-request";
+import jwt from "jsonwebtoken";
 
 export const getAllUsers = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -47,3 +48,5 @@ export const getStaffById = async (req: AuthRequest, res: Response, next: NextFu
     next(error);
   }
 };
+
+

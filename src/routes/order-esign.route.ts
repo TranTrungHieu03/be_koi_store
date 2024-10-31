@@ -1,15 +1,16 @@
 import {Router} from "express";
 import {
     confirmOrderEsginByCustomer,
-    createOrderEsign,
+    createOrderEsign, getAllOrderEsign,
     getOrderEsgin,
     updateEsginDetailByStaff, updateStatusAfterShipping
 } from "../modules/order-esign/order-esign.controller";
-import {authMiddleware} from "../middleware/auth.middleware";
+import {authMiddleware, isStaffOrManager} from "../middleware/auth.middleware";
 
 const orderEsignRoute: Router = Router();
 
 orderEsignRoute.post("/", createOrderEsign);
+orderEsignRoute.get("/", authMiddleware, isStaffOrManager, getAllOrderEsign)
 orderEsignRoute.get("/:orderEsignId", getOrderEsgin)
 orderEsignRoute.put("/:orderEsignId", updateEsginDetailByStaff);
 orderEsignRoute.put("/confirm/:orderEsignId", authMiddleware, confirmOrderEsginByCustomer);

@@ -28,3 +28,12 @@ export const generateToken = async (req: Request, res: Response, next: NextFunct
     next(error);
   }
 };
+
+export const getCurrentUser = async (req: Request, res: Response, next: NextFunction) => {
+  try{
+    const user = await AuthService.getCurrentUser(req);
+    ok(res, "Get current user success", user)
+  } catch (error) {
+    next(error);
+  }
+}
