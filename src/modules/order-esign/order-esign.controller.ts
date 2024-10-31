@@ -5,7 +5,7 @@ import {EsignStatus, FishStatus, OrderEsginType, PoolStatus, Status} from "../..
 import {OrderEsginRequestCreation} from "../../dto/order-esign/order-esign.request";
 import sequelize from "../../config/db";
 import User from "../../models/user.model";
-import {OrderEsignCreationAttributes} from "../../models/order-esign.model";
+import OrderEsign, {OrderEsignCreationAttributes} from "../../models/order-esign.model";
 import {FishService} from "../fish/fish.service";
 import {AuthRequest} from "../../types/auth-request";
 import {countDate} from "../../utils/countDate";
@@ -71,7 +71,7 @@ export const createOrderEsign = async (req: Request, res: Response, next: NextFu
                     }, t)
                 }
             }
-        } else if (data.type === OrderEsginType.OnlineSale || data.type ===OrderEsginType.OfflineSale) {
+        } else if (data.type === OrderEsginType.OnlineSale || data.type === OrderEsginType.OfflineSale) {
             if (fishList.length > 0) {
                 for (let fish of fishList) {
 
@@ -380,5 +380,23 @@ export const updateStatusAfterShipping = async (req: AuthRequest, res: Response,
     } catch (e) {
         await t.rollback()
         next(e)
+    }
+}
+
+export const getAllOrderEsign = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        // const {status} = req.params;
+        // const validStatus = Object.values(EsignStatus) as string[];
+        // if (!status) {
+        //     next();
+        // } else if (!validStatus.includes(status)) {
+        //     badRequest(res, "Invalid Status");
+        //     return
+        // }
+        // const orders = await OrderEsignService.getAll(status as EsignStatus);
+        const orders = await OrderEsignService.getAll();
+        ok(res, "Get all order esign success", orders);
+    } catch (e) {
+        next(e);
     }
 }

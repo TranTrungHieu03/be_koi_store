@@ -11,7 +11,10 @@ export class OrderEsignService {
             return await OrderEsign.findAll({
                 order: [
                     ["createdAt", "DESC"]
-                ]
+                ],
+                // where: {
+                //     status: status
+                // }
             });
         } catch (e: any) {
             throw Error(e.message || "Something went wrong.");
