@@ -13,6 +13,7 @@ import {estimateTypeFish} from "../../utils/estimateTypeFish";
 import {FeeService} from "../fee/fee.service";
 import {getDiscountLongDuration} from "../../utils/getDiscountLongDuration";
 import {PoolService} from "../pool/pool.service";
+import {OrderSaleService} from "../order-sale/order-sale.service";
 
 
 export const createOrderEsign = async (req: Request, res: Response, next: NextFunction) => {
@@ -395,6 +396,16 @@ export const getAllOrderEsign = async (req: AuthRequest, res: Response, next: Ne
         // }
         // const orders = await OrderEsignService.getAll(status as EsignStatus);
         const orders = await OrderEsignService.getAll();
+        ok(res, "Get all order esign success", orders);
+    } catch (e) {
+        next(e);
+    }
+}
+export const getAllOrderEsignByBuyer = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.userId;
+
+        const orders = await OrderEsignService.getAllByBuyerId(Number(userId));
         ok(res, "Get all order esign success", orders);
     } catch (e) {
         next(e);
