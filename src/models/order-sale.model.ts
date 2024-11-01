@@ -11,10 +11,12 @@ interface OrderSaleAttributes {
     voucherId: number;
     buyerId: number;
     status: OrderStatus;
+    createdAt: Date;
+
 }
 
 export interface OrderSaleCreateAttributes
-    extends Optional<OrderSaleAttributes, "orderSaleId" | "voucherId" | "totalPrice"> {
+    extends Optional<OrderSaleAttributes, "orderSaleId" | "voucherId" | "totalPrice"|"createdAt"> {
 }
 
 export interface OrderSaleFullAttributes extends OrderSaleAttributes {
@@ -28,6 +30,8 @@ class OrderSale extends Model<OrderSaleAttributes, OrderSaleCreateAttributes> im
     public buyerId!: number;
     public status!: OrderStatus;
     public orderDetails!: OrderSaleDetailAttributes[];
+    public createdAt!: Date;
+
 }
 
 OrderSale.init(
@@ -60,7 +64,13 @@ OrderSale.init(
         status: {
             type: DataTypes.ENUM(...Object.values(OrderStatus)),
             defaultValue: OrderStatus.Processing
-        }
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: DataTypes.NOW,
+        },
+
     },
     {
         tableName: "order-sales",

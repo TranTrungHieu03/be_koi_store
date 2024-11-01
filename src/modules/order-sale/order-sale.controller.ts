@@ -175,7 +175,7 @@ export const getOrderDetailByOrderId = async (req: AuthRequest, res: Response, n
         const orderSaleId = req.params.orderSaleId
         const order = await OrderSaleService.getAllOrderSalesByOrderId( Number(orderSaleId))
 
-        ok(res, "Get all order buy user success", order)
+        ok(res, "Get order sale detail success", order)
 
 
     } catch (e) {

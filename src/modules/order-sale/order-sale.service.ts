@@ -69,9 +69,9 @@ export class OrderSaleService {
 
     }
 
-    static async getAllOrderSalesByOrderId(orderSaleId: number): Promise<OrderSaleFullAttributes[]> {
+    static async getAllOrderSalesByOrderId(orderSaleId: number): Promise<OrderSaleFullAttributes| null> {
         try {
-            return await OrderSale.findAll({
+            return await OrderSale.findOne({
                 where: {orderSaleId},
                 include: [
                     {
@@ -155,25 +155,25 @@ export class OrderSaleService {
     }
 
     static async cancelOrder() {
-        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+        const oneHourAgo = new Date(Date.now() - 15 * 60 * 1000);
 
         try {
 
-            // const [affectedRows] = await OrderSale.update(
-            //     {status: OrderStatus.Cancel},
-            //     {
-            //         where: {
-            //             status: 'processing',
-            //             createdAt: {
-            //                 [Op.lte]: oneHourAgo,
-            //             },
-            //         },
-            //     }
-            // );
-            //
-            // if (affectedRows > 0) {
-            //     console.log(`${affectedRows} is canceled.`);
-            // }
+            const [affectedRows] = await OrderSale.update(
+                {status: OrderStatus.Cancel},
+                {
+                    where: {
+                        status: 'processing',
+                        createdAt: {
+                            [Op.lte]: oneHourAgo,
+                        },
+                    },
+                }
+            );
+
+            if (affectedRows > 0) {
+                console.log(`${affectedRows} is canceled.`);
+            }
         } catch
             (e: any) {
             new Error(e.message || "Something went wrong.");
