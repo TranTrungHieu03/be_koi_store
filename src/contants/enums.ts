@@ -57,7 +57,8 @@ export enum OrderStatus {
     Processing = 'processing',
     Accident = 'accident',
     Paid = 'paid',
-    Cancel='cancel'
+    Cancel='cancel',
+    Esgin='esign'
 }
 
 export enum OrderEsginType {

@@ -51,10 +51,10 @@ export class OrderSaleService {
 
     }
 
-    static async getAllOrderSalesByOrderId(buyerId: number, orderSaleId: number): Promise<OrderSaleFullAttributes[]> {
+    static async getAllOrderSalesByOrderId(orderSaleId: number): Promise<OrderSaleFullAttributes[]> {
         try {
             return await OrderSale.findAll({
-                where: {buyerId, orderSaleId},
+                where: {orderSaleId},
                 include: [
                     {
                         model: OrderSaleDetail,

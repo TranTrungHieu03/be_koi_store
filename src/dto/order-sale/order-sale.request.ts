@@ -1,6 +1,7 @@
 export type CreateOrderSaleRequest = {
     buyerId: number;
     voucherCode: string;
+
     fishesOrder: {
         uniqueFishes: [
             {

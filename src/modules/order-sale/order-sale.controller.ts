@@ -172,9 +172,8 @@ export const getOrdersByUserId = async (req: AuthRequest, res: Response, next: N
 
 export const getOrderDetailByOrderId = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const userId = req.user?.userId;
         const orderSaleId = req.params.orderSaleId
-        const order = await OrderSaleService.getAllOrderSalesByOrderId(Number(userId), Number(orderSaleId))
+        const order = await OrderSaleService.getAllOrderSalesByOrderId( Number(orderSaleId))
 
         ok(res, "Get all order buy user success", order)
 
