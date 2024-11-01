@@ -2,6 +2,8 @@ import Fish, {FishCreationAttributes} from "../../models/fish.model";
 import {FishStatus, Status} from "../../contants/enums";
 import {PackageCreationAttributes} from "../../models/package.model";
 import sequelize, {Transaction} from "sequelize";
+import Voucher from "../../models/voucher.model";
+import User from "../../models/user.model";
 
 export class FishService {
     static async getAllFishes(): Promise<Fish[]> {
@@ -61,7 +63,7 @@ export class FishService {
 
     static async updateStatus(fishId: number, status: Status, transaction: Transaction): Promise<boolean> {
         try {
-            if (status !== Status.DoneCare){
+            if (status !== Status.DoneCare) {
                 const [updateRows] = await Fish.update({
                     status
                 }, {
@@ -70,7 +72,7 @@ export class FishService {
                     }, transaction
                 });
                 return updateRows > 0;
-            }else {
+            } else {
                 const [updateRows] = await Fish.update({
                     status,
                     remainQuantity: sequelize.literal(`remainQuantity - 1`),
@@ -150,9 +152,9 @@ export class FishService {
         }
     }
 
-    static async updateFish(fishId: number, data: FishCreationAttributes, transaction?:Transaction): Promise<boolean> {
+    static async updateFish(fishId: number, data: FishCreationAttributes, transaction?: Transaction): Promise<boolean> {
         try {
-            const [updateRows] = await Fish.update(data, {where: {fishId},transaction});
+            const [updateRows] = await Fish.update(data, {where: {fishId}, transaction});
             return updateRows > 0
         } catch (e: any) {
             throw Error(e.message || "Something went wrong.");

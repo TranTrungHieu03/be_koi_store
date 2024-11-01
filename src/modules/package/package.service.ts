@@ -1,5 +1,8 @@
 import Package, {PackageCreationAttributes} from "../../models/package.model";
 import {Transaction} from "sequelize";
+import Fish from "../../models/fish.model";
+import User from "../../models/user.model";
+import Pool from "../../models/pool.model";
 
 export class PackageService {
     static async getAllPackages(): Promise<Package[]> {
@@ -7,6 +10,18 @@ export class PackageService {
             return await Package.findAll({
                 order: [
                     ["createdAt", "DESC"]
+                ],
+                include: [
+                    {
+                        model: Fish,
+                        as: "fish",
+                    },
+                    {
+                        model: User,
+                        as: "owner"
+                    }, {
+                        model: Pool, as: "pool"
+                    }
                 ]
             });
         } catch (e: any) {
