@@ -13,6 +13,7 @@ import {getDiscountPackages} from "../../utils/discount-package";
 import {formatDate} from "../../utils/formatDate";
 import {AuthRequest} from "../../types/auth-request";
 import {PoolService} from "../pool/pool.service";
+import {or} from "sequelize";
 
 export const getAllOrderSale = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -80,9 +81,9 @@ export const createOrderSale = async (req: AuthRequest, res: Response, next: Nex
                     badRequest(res, `Fish ${currentFish?.name} is not available for unique sale `);
                     return
                 }
-                if (fish.quantity > 1){
+                if (fish.quantity > 1) {
                     await t.rollback();
-                    badRequest(res, `Fish ${currentFish?.name} is uniquegit git  `);
+                    badRequest(res, `Fish ${currentFish?.name} is unique  `);
                     return
                 }
                 cost += currentFish?.price;
@@ -96,9 +97,9 @@ export const createOrderSale = async (req: AuthRequest, res: Response, next: Nex
                     orderSaleId: newOrderSale.orderSaleId
                 }, t)
 
-                await FishService.updateStatusAndQuantity(fish.id, fish.quantity, Status.Sold, t);
+                await FishService.updateStatusAndQuantity(fish.id, fish.quantity, Status.Inactive, t);
 
-                await PoolService.updatePoolAfterSoldOut(currentFish.poolId, 1, t)
+                // await PoolService.updatePoolAfterSoldOut(currentFish.poolId, 1, t)
             }
         }
         if (packageList.length > 0) {
@@ -118,12 +119,12 @@ export const createOrderSale = async (req: AuthRequest, res: Response, next: Nex
                 let updateStatus = Status.Active
 
                 if (currentFish.remainQuantity === container.quantity) {
-                    updateStatus = Status.Sold
+                    updateStatus = Status.Inactive
                 }
 
 
                 await FishService.updateStatusAndQuantity(container.id, container.quantity, updateStatus, t,)
-                await PoolService.updatePoolAfterSoldOut(currentFish.poolId, container.quantity, t)
+                // await PoolService.updatePoolAfterSoldOut(currentFish.poolId, container.quantity, t)
                 const discount = getDiscountPackages(container.quantity)
                 cost += currentFish?.price * container.quantity * discount
 
@@ -173,7 +174,7 @@ export const getOrdersByUserId = async (req: AuthRequest, res: Response, next: N
 export const getOrderDetailByOrderId = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const orderSaleId = req.params.orderSaleId
-        const order = await OrderSaleService.getAllOrderSalesByOrderId( Number(orderSaleId))
+        const order = await OrderSaleService.getAllOrderSalesByOrderId(Number(orderSaleId))
 
         ok(res, "Get order sale detail success", order)
 
@@ -193,6 +194,24 @@ export const updateTotalOrderSaleStatus = async (req: AuthRequest, res: Response
             badRequest(res, `Status is wrong format. Accepted values are: ${Object.values(OrderStatus).join(', ')}.`);
             return
         }
+
+        if (status === OrderStatus.Paid) {
+            const order = await OrderSaleService.getAllOrderSalesByOrderId(Number(orderSaleId));
+            const orderDetails = order?.orderDetails!;
+
+            for (let orderDetail of orderDetails) {
+                if (orderDetail.fishId !== null) {
+                    const fish = await FishService.getFishByFishId(orderDetail.fishId);
+                    await PoolService.updatePoolAfterSoldOut(Number(fish?.poolId), 1, t)
+                } else {
+                    const packageItem = await PackageService.getPackageByPackageId(orderDetail.packageId);
+                    const fish = await FishService.getFishByFishId(Number(packageItem?.fishId));
+                    await PoolService.updatePoolAfterSoldOut(Number(fish?.poolId), Number(packageItem?.quantity), t)
+                }
+            }
+
+        }
+
 
         await OrderSaleService.updateStatusForTotalOrderDetail(Number(orderSaleId), status, t);
 
