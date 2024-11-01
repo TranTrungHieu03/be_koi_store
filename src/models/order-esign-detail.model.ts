@@ -79,7 +79,7 @@ OrderEsign.hasMany(OrderEsignDetail, {
     foreignKey: "orderEsignId", as: "orderDetails"
 });
 
-OrderEsignDetail.hasOne(Fish, {foreignKey: "fishId", as :"fish"});
-Fish.belongsTo(OrderEsignDetail, {foreignKey: "fishId"});
+OrderEsignDetail.belongsTo(Fish, {foreignKey: "fishId", as :"fish"});
+Fish.hasOne(OrderEsignDetail, {foreignKey: "fishId"});
 
 export default OrderEsignDetail;

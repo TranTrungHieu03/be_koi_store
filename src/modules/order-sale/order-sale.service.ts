@@ -1,10 +1,13 @@
 import OrderSale, {OrderSaleCreateAttributes, OrderSaleFullAttributes} from "../../models/order-sale.model";
 import OrderSaleDetail, {OrderSaleDetailCreationAttributes} from "../../models/order-sale-detail.model";
 import {Op, Transaction} from "sequelize";
-import {OrderStatus} from "../../contants/enums";
-import Order from "../../models/order-sale.model";
+import {OrderStatus, Status} from "../../contants/enums";
 import Voucher from "../../models/voucher.model";
 import User from "../../models/user.model";
+import Fish from "../../models/fish.model";
+import Package from "../../models/package.model";
+import sequelize from "../../config/db";
+import {PackageService} from "../package/package.service";
 
 export class OrderSaleService {
     static async getAllOrderSales(): Promise<OrderSale[]> {
@@ -58,7 +61,19 @@ export class OrderSaleService {
                     {
                         model: OrderSaleDetail,
                         as: "orderDetails",
-                        required: true
+                        required: true,
+                        include: [
+                            {
+                                model: Fish,
+                                as: 'fish',
+                                required: false
+                            },
+                            {
+                                model: Package,
+                                as: "package",
+                                required: false
+                            }
+                        ]
                     }
                 ]
             });
@@ -69,7 +84,7 @@ export class OrderSaleService {
 
     }
 
-    static async getAllOrderSalesByOrderId(orderSaleId: number): Promise<OrderSaleFullAttributes| null> {
+    static async getAllOrderSalesByOrderId(orderSaleId: number): Promise<OrderSaleFullAttributes | null> {
         try {
             return await OrderSale.findOne({
                 where: {orderSaleId},
@@ -77,7 +92,17 @@ export class OrderSaleService {
                     {
                         model: OrderSaleDetail,
                         as: "orderDetails",
-                        required: true
+                        required: true,
+                        include: [
+                            {
+                                model: Fish,
+                                as: 'fish'
+                            },
+                            {
+                                model: Package,
+                                as: "package"
+                            }
+                        ]
                     }
                 ]
             });
@@ -156,8 +181,54 @@ export class OrderSaleService {
 
     static async cancelOrder() {
         const oneHourAgo = new Date(Date.now() - 15 * 60 * 1000);
-
+        const t = await sequelize.transaction()
         try {
+            const ordersToCancel = await OrderSale.findAll({
+                where: {
+                    status: 'processing',
+                    createdAt: {
+                        [Op.lte]: oneHourAgo,
+                    },
+                },
+                include: [
+                    {
+                        model: OrderSaleDetail,
+                        as: 'orderDetails',
+                        required: true
+                    }
+                ]
+            },);
+            console.log(ordersToCancel)
+            for (let order of ordersToCancel) {
+
+                const orderDetails = order.orderDetails;
+                for (let orderDetail of orderDetails) {
+                    if (orderDetail.fishId !== null) {
+                        await Fish.update({
+                            remainQuantity: sequelize.literal(`remainQuantity + 1`),
+                            soldQuantity: sequelize.literal(`soldQuantity - 1`),
+                            status: Status.Active,
+                        }, {
+                            where: {
+                                fishId: orderDetail.fishId
+                            }, transaction: t
+                        });
+                    } else {
+                        const packageItem = await PackageService.getPackageByPackageId(orderDetail.packageId);
+                        await Fish.update({
+                            remainQuantity: sequelize.literal(`remainQuantity + ${packageItem?.quantity}`),
+                            soldQuantity: sequelize.literal(`soldQuantity - ${packageItem?.quantity}`),
+                            status: Status.Active,
+                        }, {
+                            where: {
+                                fishId: packageItem?.fishId
+                            }, transaction: t
+                        });
+
+                    }
+                }
+            }
+
 
             const [affectedRows] = await OrderSale.update(
                 {status: OrderStatus.Cancel},
@@ -167,15 +238,17 @@ export class OrderSaleService {
                         createdAt: {
                             [Op.lte]: oneHourAgo,
                         },
-                    },
-                }
+                    }, transaction: t
+                },
             );
 
             if (affectedRows > 0) {
                 console.log(`${affectedRows} is canceled.`);
             }
+            await t.commit();
         } catch
             (e: any) {
+            await t.rollback();
             new Error(e.message || "Something went wrong.");
         }
     }

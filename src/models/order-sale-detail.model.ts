@@ -80,14 +80,16 @@ OrderSaleDetail.init(
         sequelize,
     }
 );
-OrderSaleDetail.belongsTo(OrderSale, {foreignKey: "orderSaleId"});
-OrderSale.hasMany(OrderSaleDetail, {foreignKey: "orderSaleId", as: "orderDetails"});
+// OrderSaleDetail -> OrderSale
+OrderSale.hasMany(OrderSaleDetail, { foreignKey: "orderSaleId", as: "orderDetails" });
+OrderSaleDetail.belongsTo(OrderSale, { foreignKey: "orderSaleId" });
 
-OrderSaleDetail.hasOne(Fish, {foreignKey: "fishId"});
-Fish.belongsTo(OrderSaleDetail, {foreignKey: "fishId"});
+// OrderSaleDetail -> Fish
+OrderSaleDetail.belongsTo(Fish, { foreignKey: "fishId", as: "fish" });
+Fish.hasOne(OrderSaleDetail, { foreignKey: "fishId" });
 
-OrderSaleDetail.hasOne(Package, {
-    foreignKey: "packageId",
-});
-Package.belongsTo(OrderSaleDetail, {foreignKey: "packageId"});
+// OrderSaleDetail -> Package
+OrderSaleDetail.belongsTo(Package, { foreignKey: "packageId", as: "package" });
+Package.hasOne(OrderSaleDetail, { foreignKey: "packageId" });
+
 export default OrderSaleDetail;
