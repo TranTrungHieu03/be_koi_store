@@ -69,10 +69,10 @@ OrderSale.init(
     }
 );
 
-OrderSale.belongsTo(User, {foreignKey: "buyerId"});
+OrderSale.belongsTo(User, {foreignKey: "buyerId", as: "buyer"});
 User.hasMany(OrderSale, {
-    foreignKey: "buyerId",
+    foreignKey: "buyerId"
 });
-OrderSale.hasOne(Voucher, {foreignKey: "voucherId"})
+OrderSale.hasOne(Voucher, {foreignKey: "voucherId", as: "voucher"})
 
 export default OrderSale;

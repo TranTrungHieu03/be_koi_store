@@ -3,11 +3,29 @@ import OrderSaleDetail, {OrderSaleDetailCreationAttributes} from "../../models/o
 import {Op, Transaction} from "sequelize";
 import {OrderStatus} from "../../contants/enums";
 import Order from "../../models/order-sale.model";
+import Voucher from "../../models/voucher.model";
+import User from "../../models/user.model";
 
 export class OrderSaleService {
     static async getAllOrderSales(): Promise<OrderSale[]> {
         try {
-            return OrderSale.findAll();
+            return OrderSale.findAll(
+                {
+                    order: [
+                        ["createdAt", "DESC"]
+                    ],
+                    include: [
+                        {
+                            model: Voucher,
+                            as: "voucher",
+                        }, {
+                            model: User,
+                            as: "buyer"
+                        }
+                    ],
+
+                }
+            );
         } catch (e: any) {
             throw Error(e.message || "Something went wrong.");
         }

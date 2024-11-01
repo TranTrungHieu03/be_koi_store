@@ -190,7 +190,7 @@ export const updateTotalOrderSaleStatus = async (req: AuthRequest, res: Response
         const orderSaleId = req.params.orderSaleId
         if (!Object.values(OrderStatus).includes(status)) {
             await t.rollback()
-            badRequest(res, `Status is wrong format.Accepted values are: ${Object.values(OrderStatus).join(', ')}.`);
+            badRequest(res, `Status is wrong format. Accepted values are: ${Object.values(OrderStatus).join(', ')}.`);
             return
         }
 

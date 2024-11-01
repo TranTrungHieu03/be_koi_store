@@ -13,7 +13,7 @@ interface PackageAttributes {
     fishId: number;
 }
 
-export interface PackageCreationAttributes extends Optional<PackageAttributes, "packageId"|"poolId"> {
+export interface PackageCreationAttributes extends Optional<PackageAttributes, "packageId" | "poolId"> {
 }
 
 class Package extends Model<PackageAttributes, PackageCreationAttributes> implements PackageAttributes {
@@ -70,11 +70,11 @@ Package.init(
         sequelize,
     }
 );
-Package.hasOne(Fish, {foreignKey: "fishId"});
+Package.hasOne(Fish, {foreignKey: "fishId", as: "fish"});
 Package.belongsTo(User, {
-    foreignKey: "ownerId",
+    foreignKey: "ownerId", as: "owner"
 });
-Package.belongsTo(Pool, {foreignKey: "poolId"});
+Package.belongsTo(Pool, {foreignKey: "poolId", as: "pool"});
 
 Package.belongsTo(Fish, {foreignKey: "fishId"})
 export default Package;
