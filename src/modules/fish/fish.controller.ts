@@ -106,3 +106,12 @@ export const deleteFish = async (req: Request, res: Response, next: NextFunction
         next(e);
     }
 }
+
+export const getFishesAvailable = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const fishes = await FishService.getFishAvailable();
+        ok(res, "Fish available", fishes);
+    } catch (e) {
+        next(e);
+    }
+}

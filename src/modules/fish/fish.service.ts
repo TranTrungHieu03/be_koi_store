@@ -161,4 +161,17 @@ export class FishService {
         }
     }
 
+    static async getFishAvailable(): Promise<Fish[]> {
+        try {
+            return await Fish.findAll({
+                where: {
+                    status: Status.Active || Status.Esign
+                }
+            })
+
+        } catch (e: any) {
+            throw Error(e.message || "Something went wrong.");
+        }
+    }
+
 }

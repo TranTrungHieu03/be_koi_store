@@ -6,5 +6,4 @@ export const orderCron = () => {
     cron.schedule('*/5 * * * *', async () => {
         await OrderSaleService.cancelOrder()
     });
-
 }
