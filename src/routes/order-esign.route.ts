@@ -1,5 +1,6 @@
 import {Router} from "express";
 import {
+    checkPriceCare,
     confirmOrderEsginByCustomer,
     createOrderEsign, getAllOrderEsign, getAllOrderEsignByBuyer,
     getOrderEsgin,
@@ -16,6 +17,7 @@ orderEsignRoute.get("/:orderEsignId", getOrderEsgin)
 orderEsignRoute.put("/:orderEsignId", updateEsginDetailByStaff);
 orderEsignRoute.put("/confirm/:orderEsignId", authMiddleware, confirmOrderEsginByCustomer);
 orderEsignRoute.put("/update/:orderEsignId", authMiddleware, updateStatusAfterShipping)
+
 
 
 export default orderEsignRoute;

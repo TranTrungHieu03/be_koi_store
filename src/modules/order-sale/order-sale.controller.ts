@@ -13,7 +13,6 @@ import {getDiscountPackages} from "../../utils/discount-package";
 import {formatDate} from "../../utils/formatDate";
 import {AuthRequest} from "../../types/auth-request";
 import {PoolService} from "../pool/pool.service";
-import {or} from "sequelize";
 
 export const getAllOrderSale = async (req: Request, res: Response, next: NextFunction) => {
     try {

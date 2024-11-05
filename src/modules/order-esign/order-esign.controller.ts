@@ -5,7 +5,7 @@ import {EsignStatus, FishStatus, OrderEsginType, PoolStatus, Status} from "../..
 import {OrderEsginRequestCreation} from "../../dto/order-esign/order-esign.request";
 import sequelize from "../../config/db";
 import User from "../../models/user.model";
-import OrderEsign, {OrderEsignCreationAttributes} from "../../models/order-esign.model";
+import {OrderEsignCreationAttributes} from "../../models/order-esign.model";
 import {FishService} from "../fish/fish.service";
 import {AuthRequest} from "../../types/auth-request";
 import {countDate} from "../../utils/countDate";
@@ -14,6 +14,8 @@ import {FeeService} from "../fee/fee.service";
 import {getDiscountLongDuration} from "../../utils/getDiscountLongDuration";
 import {PoolService} from "../pool/pool.service";
 import {OrderSaleService} from "../order-sale/order-sale.service";
+import {PackageService} from "../package/package.service";
+
 
 
 export const createOrderEsign = async (req: Request, res: Response, next: NextFunction) => {
@@ -225,11 +227,11 @@ export const updateEsginDetailByStaff = async (req: AuthRequest, res: Response, 
                 }
                 let initPrice = 0
                 if (data.type === OrderEsginType.Care) {
-                    initPrice = (getFee!.feed * count + getFee!.careFeed * count * rateHealth + getFee!.other + fish.numberOfHealthCheck * getFee!.healthCheck) * 10000;
+                    initPrice = (getFee!.feed * count + getFee!.careFeed * count * rateHealth + getFee!.other) * 10000;
                     await OrderEsignService.updateEsignDetail(fish.orderEsignDetailId!, {
                         ...currentOrderEsignDetail,
                         orderStatus: EsignStatus.Pending,
-                        initPrice: fish.price * 0.1
+                        initPrice: fish.price
                     }, t)
 
                     totalPrice += initPrice
@@ -401,6 +403,65 @@ export const getAllOrderEsign = async (req: AuthRequest, res: Response, next: Ne
         next(e);
     }
 }
+export const checkPriceCare = async (req: AuthRequest, res: Response, next: NextFunction) => {
+
+    try {
+        const {orderId} = req.params;
+        const {expireDate} = req.body;
+
+        const order = await OrderSaleService.getAllOrderSalesByOrderId(Number(orderId));
+
+        if (!order) {
+            badRequest(res, "Order not found");
+            return
+        }
+
+        let totalPrice = 0
+        let count = countDate(new Date(), expireDate);
+        console.log(count, new Date())
+        if (count <= 3) {
+            ok(res, "Free Service For 3 days");
+            return
+        }
+
+        count -= 3;
+
+        for (let orderDetail of order.orderDetails) {
+            if (orderDetail.fishId) {
+                const fish = await FishService.getFishByFishId(Number(orderDetail.fishId))
+                if (!fish) {
+                    badRequest(res, "Fish not found");
+                    return;
+                }
+                const typeOfFish = estimateTypeFish(fish?.weight);
+                const getFee = await FeeService.getById(typeOfFish);
+                totalPrice += (getFee!.feed * count + getFee!.careFeed * count + getFee!.other) * 10000;
+
+
+            } else {
+                const packageItem = await PackageService.getPackageByPackageId(Number(orderDetail.packageId));
+                const fish = await FishService.getFishByFishId(Number(packageItem?.fishId));
+                if (!fish) {
+                    badRequest(res, "Fish not found");
+                    return;
+                }
+                const getFee = await FeeService.getById(5);
+                totalPrice += (getFee!.feed * count + getFee!.careFeed * count + getFee!.other) * 10000;
+
+            }
+        }
+
+        ok(res, "Get all order esign success", {
+            orderId, totalPrice, expireDate
+        });
+
+    } catch (e) {
+
+        next(e);
+
+    }
+
+}
 export const getAllOrderEsignByBuyer = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const userId = req.user?.userId;
@@ -411,3 +472,4 @@ export const getAllOrderEsignByBuyer = async (req: AuthRequest, res: Response, n
         next(e);
     }
 }
+
