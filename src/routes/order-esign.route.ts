@@ -1,10 +1,12 @@
 import {Router} from "express";
 import {
-    checkPriceCare,
+    confirmCareAfterBuy,
     confirmOrderEsginByCustomer,
-    createOrderEsign, getAllOrderEsign,
+    createOrderEsign,
+    getAllOrderEsign,
     getOrderEsgin,
-    updateEsginDetailByStaff, updateStatusAfterShipping
+    updateEsginDetailByStaff,
+    updateStatusAfterShipping
 } from "../modules/order-esign/order-esign.controller";
 import {authMiddleware, isStaffOrManager} from "../middleware/auth.middleware";
 
@@ -16,7 +18,7 @@ orderEsignRoute.get("/:orderEsignId", getOrderEsgin)
 orderEsignRoute.put("/:orderEsignId", updateEsginDetailByStaff);
 orderEsignRoute.put("/confirm/:orderEsignId", authMiddleware, confirmOrderEsginByCustomer);
 orderEsignRoute.put("/update/:orderEsignId", authMiddleware, updateStatusAfterShipping)
-
+orderEsignRoute.post("/afterBuy/:orderId", authMiddleware, confirmCareAfterBuy);
 
 
 export default orderEsignRoute;

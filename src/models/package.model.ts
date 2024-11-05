@@ -11,9 +11,10 @@ interface PackageAttributes {
     ownerId: number;
     poolId: number;
     fishId: number;
+    status: boolean;
 }
 
-export interface PackageCreationAttributes extends Optional<PackageAttributes, "packageId" | "poolId"> {
+export interface PackageCreationAttributes extends Optional<PackageAttributes, "packageId" | "poolId" | "status"> {
 }
 
 class Package extends Model<PackageAttributes, PackageCreationAttributes> implements PackageAttributes {
@@ -22,7 +23,9 @@ class Package extends Model<PackageAttributes, PackageCreationAttributes> implem
     public quantity!: number;
     public ownerId!: number;
     public poolId!: number;
-    public fishId!: number
+    public fishId!: number;
+    public status!: boolean
+
 }
 
 Package.init(
@@ -64,6 +67,10 @@ Package.init(
                 key: "fishId",
             },
         },
+        status: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true
+        }
     },
     {
         tableName: "packages",

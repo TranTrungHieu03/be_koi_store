@@ -1,7 +1,7 @@
 import OrderEsign, {OrderEsignCreationAttributes, OrderEsignFullAttributes} from "../../models/order-esign.model";
 import OrderEsignDetail, {OrderEsignDetailCreationAttributes} from "../../models/order-esign-detail.model";
 import {Transaction} from "sequelize";
-import {EsignStatus, Status} from "../../contants/enums";
+import {EsignStatus, OrderStatus, Status} from "../../contants/enums";
 import {FishService} from "../fish/fish.service";
 import Fish from "../../models/fish.model";
 
@@ -43,6 +43,7 @@ export class OrderEsignService {
             throw Error(e.message || "Something went wrong.");
         }
     }
+
     static async getShortById(orderEsignId: number): Promise<OrderEsignFullAttributes | null> {
         try {
             return await OrderEsign.findByPk(orderEsignId, {
@@ -212,6 +213,19 @@ export class OrderEsignService {
     static async findAllFish(orderEsignId: number) {
         try {
             return await OrderEsignDetail.findAll({
+                where: {
+                    orderEsignId
+                }
+            })
+        } catch
+            (e: any) {
+            new Error(e.message || "Something went wrong.");
+        }
+    }
+
+    static async cancelOrderEsign(orderEsignId: number) {
+        try {
+            return await OrderEsignDetail.update({orderStatus: EsignStatus.Cancel}, {
                 where: {
                     orderEsignId
                 }

@@ -451,7 +451,7 @@ export const checkPriceCare = async (req: AuthRequest, res: Response, next: Next
             }
         }
 
-        ok(res, "Get all order esign success", {
+        ok(res, "Check price success", {
             orderId, totalPrice, expireDate
         });
 
@@ -461,4 +461,80 @@ export const checkPriceCare = async (req: AuthRequest, res: Response, next: Next
 
     }
 
+}
+
+export const confirmCareAfterBuy = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const t = await sequelize.transaction()
+    try {
+        const {orderId} = req.params;
+        const {expireDate, userId} = req.body;
+        const dataOrder: OrderEsignCreationAttributes = {
+            userId: userId,
+            status: EsignStatus.Pending,
+            receiveDate: new Date(),
+            expiryDate: expireDate,
+            type: OrderEsginType.Care
+        }
+
+        const newOrderEsign = await OrderEsignService.createEsign(dataOrder, t);
+
+        const order = await OrderSaleService.getAllOrderSalesByOrderId(Number(orderId));
+
+        if (!order) {
+            badRequest(res, "Order not found");
+            return
+        }
+
+        let totalPrice = 0
+        let count = countDate(new Date(), expireDate);
+
+        count -= 3;
+
+        for (let orderDetail of order.orderDetails) {
+            if (orderDetail.fishId) {
+                const fish = await FishService.getFishByFishId(Number(orderDetail.fishId))
+                if (!fish) {
+                    badRequest(res, "Fish not found");
+                    return;
+                }
+                const typeOfFish = estimateTypeFish(fish?.weight);
+                const getFee = await FeeService.getById(typeOfFish);
+                totalPrice += (getFee!.feed * count + getFee!.careFeed * count + getFee!.other) * 10000;
+                fish.status = Status.PendingCare;
+                await fish.save({transaction: t})
+                await OrderEsignService.createEsignDetail({
+                    fishId: fish.fishId,
+                    quantity: 1,
+                    orderStatus: EsignStatus.Pending,
+                    orderEsignId: newOrderEsign.orderEsignId,
+                    numberOfHealthCheck: 0,
+                    initPrice: (getFee!.feed * count + getFee!.careFeed * count + getFee!.other) * 10000
+                }, t)
+
+            } else {
+                const packageItem = await PackageService.getPackageByPackageId(Number(orderDetail.packageId));
+                const fish = await FishService.getFishByFishId(Number(packageItem?.fishId));
+                if (!fish) {
+                    badRequest(res, "Fish not found");
+                    return;
+                }
+                const getFee = await FeeService.getById(5);
+                totalPrice += (getFee!.feed * count + getFee!.careFeed * count + getFee!.other) * 10000 * (packageItem?.quantity ?? 0);
+                await OrderEsignService.createEsignDetail({
+                    packageId: packageItem?.packageId,
+                    quantity: 1,
+                    orderStatus: EsignStatus.Pending,
+                    orderEsignId: newOrderEsign.orderEsignId,
+                    numberOfHealthCheck: 0,
+                    initPrice: (getFee!.feed * count + getFee!.careFeed * count + getFee!.other) * 10000 * (packageItem?.quantity ?? 0)
+                }, t)
+            }
+        }
+        await t.commit()
+        created(res, "Create order success!", newOrderEsign);
+    } catch (e) {
+
+        next(e);
+
+    }
 }
