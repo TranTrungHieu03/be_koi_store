@@ -92,4 +92,7 @@ OrderEsign.init({
     tableName: "order-esigns",
     sequelize
 });
+
+OrderEsign.belongsTo(User, {foreignKey: "userId", as: "user"});
+OrderEsign.belongsTo(User, {foreignKey: "staffId", as: "staff"})
 export default OrderEsign

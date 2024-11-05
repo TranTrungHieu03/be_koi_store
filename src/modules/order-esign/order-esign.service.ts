@@ -4,6 +4,8 @@ import {Transaction} from "sequelize";
 import {EsignStatus, Status} from "../../contants/enums";
 import {FishService} from "../fish/fish.service";
 import Fish from "../../models/fish.model";
+import User from "../../models/user.model";
+import OrderSaleDetail from "../../models/order-sale-detail.model";
 
 export class OrderEsignService {
     static async getAll(): Promise<OrderEsign[]> {
@@ -43,6 +45,7 @@ export class OrderEsignService {
             throw Error(e.message || "Something went wrong.");
         }
     }
+
     static async getShortById(orderEsignId: number): Promise<OrderEsignFullAttributes | null> {
         try {
             return await OrderEsign.findByPk(orderEsignId, {
@@ -220,5 +223,44 @@ export class OrderEsignService {
             (e: any) {
             new Error(e.message || "Something went wrong.");
         }
+    }
+
+    static async getAllByBuyerId(userId: number) {
+        try {
+            return await OrderEsign.findAll({
+                where: {
+                    userId
+                },
+                order: [
+                    ["createdAt", "DESC"]
+                ],
+                include: [
+                    {
+                        model: User,
+                        as: "user"
+                    },
+                    {
+                        model: User,
+                        as: "staff"
+                    },
+                    {
+                        model: OrderEsignDetail,
+                        as: "orderDetails",
+                        required: true,
+                        include: [
+                            {
+                                model: Fish,
+                                as: "fish"
+                            }
+                        ]
+                    }
+
+                ]
+            })
+        } catch
+            (e: any) {
+            new Error(e.message || "Something went wrong.");
+        }
+
     }
 }

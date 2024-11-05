@@ -17,6 +17,7 @@ import {OrderSaleService} from "../order-sale/order-sale.service";
 import {PackageService} from "../package/package.service";
 
 
+
 export const createOrderEsign = async (req: Request, res: Response, next: NextFunction) => {
     const t = await sequelize.transaction();
     try {
@@ -402,7 +403,6 @@ export const getAllOrderEsign = async (req: AuthRequest, res: Response, next: Ne
         next(e);
     }
 }
-
 export const checkPriceCare = async (req: AuthRequest, res: Response, next: NextFunction) => {
 
     try {
@@ -462,3 +462,14 @@ export const checkPriceCare = async (req: AuthRequest, res: Response, next: Next
     }
 
 }
+export const getAllOrderEsignByBuyer = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.userId;
+
+        const orders = await OrderEsignService.getAllByBuyerId(Number(userId));
+        ok(res, "Get all order esign success", orders);
+    } catch (e) {
+        next(e);
+    }
+}
+
