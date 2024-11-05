@@ -451,7 +451,7 @@ export const checkPriceCare = async (req: AuthRequest, res: Response, next: Next
             }
         }
 
-        ok(res, "Check price success", {
+        ok(res, "Get all order esign success", {
             orderId, totalPrice, expireDate
         });
 
@@ -538,3 +538,14 @@ export const confirmCareAfterBuy = async (req: AuthRequest, res: Response, next:
 
     }
 }
+export const getAllOrderEsignByBuyer = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.userId;
+
+        const orders = await OrderEsignService.getAllByBuyerId(Number(userId));
+        ok(res, "Get all order esign success", orders);
+    } catch (e) {
+        next(e);
+    }
+}
+
