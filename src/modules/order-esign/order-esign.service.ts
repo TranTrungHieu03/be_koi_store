@@ -45,7 +45,6 @@ export class OrderEsignService {
             throw Error(e.message || "Something went wrong.");
         }
     }
-
     static async getShortById(orderEsignId: number): Promise<OrderEsignFullAttributes | null> {
         try {
             return await OrderEsign.findByPk(orderEsignId, {
@@ -262,5 +261,18 @@ export class OrderEsignService {
             new Error(e.message || "Something went wrong.");
         }
 
+    }
+
+    static async cancelOrderEsign(orderEsignId: number) {
+        try {
+            return await OrderEsignDetail.update({orderStatus: EsignStatus.Cancel}, {
+                where: {
+                    orderEsignId
+                }
+            })
+        } catch
+            (e: any) {
+            new Error(e.message || "Something went wrong.");
+        }
     }
 }

@@ -35,7 +35,8 @@ export enum EsignStatus {
     Pending = 'pending',
     Paid = 'paid',
     Done ="done",
-    Confirm="confirm"
+    Confirm="confirm",
+    Cancel="cancel"
 }
 
 export enum FishStatus {

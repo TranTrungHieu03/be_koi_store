@@ -18,4 +18,5 @@ orderSaleRoute.get("/:orderSaleId", authMiddleware, getOrderDetailByOrderId);
 orderSaleRoute.put("/updateOrder/:orderSaleId", authMiddleware, updateTotalOrderSaleStatus);
 orderSaleRoute.put("/updateOrderDetail/:orderSaleDetailId", authMiddleware, updateStatusOrderDetail);
 orderSaleRoute.put("/check-price/:orderId", authMiddleware, checkPriceCare)
+
 export default orderSaleRoute;

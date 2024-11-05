@@ -1,13 +1,15 @@
 import OrderSale, {OrderSaleCreateAttributes, OrderSaleFullAttributes} from "../../models/order-sale.model";
 import OrderSaleDetail, {OrderSaleDetailCreationAttributes} from "../../models/order-sale-detail.model";
 import {Op, Transaction} from "sequelize";
-import {OrderStatus, Status} from "../../contants/enums";
+import {EsignStatus, OrderStatus, Status} from "../../contants/enums";
 import Voucher from "../../models/voucher.model";
 import User from "../../models/user.model";
 import Fish from "../../models/fish.model";
 import Package from "../../models/package.model";
 import sequelize from "../../config/db";
 import {PackageService} from "../package/package.service";
+import OrderEsignDetail from "../../models/order-esign-detail.model";
+import OrderEsign from "../../models/order-esign.model";
 
 export class OrderSaleService {
     static async getAllOrderSales(): Promise<OrderSale[]> {
@@ -204,6 +206,31 @@ export class OrderSaleService {
                 const orderDetails = order.orderDetails;
                 for (let orderDetail of orderDetails) {
                     if (orderDetail.fishId !== null) {
+                        // await OrderEsignDetail.update({orderStatus: EsignStatus.Cancel}, {
+                        //     where: {
+                        //         fishId: orderDetail.fishId,
+                        //     }, transaction: t
+                        // })
+                        const orderEsignDetail = await OrderEsignDetail.findOne({
+                            where: {
+                                fishId: orderDetail.fishId,
+                            }
+                        })
+                        if (!orderEsignDetail) {
+                            await t.rollback();
+                            return;
+                        }
+                        orderEsignDetail.orderStatus = EsignStatus.Cancel
+                        await OrderEsign.update({
+                            status: EsignStatus.Cancel
+                        }, {
+                            where: {
+                                orderEsignId: orderEsignDetail.orderEsignId
+                            }
+                        })
+                        await orderEsignDetail.save({transaction: t})
+
+
                         await Fish.update({
                             remainQuantity: sequelize.literal(`remainQuantity + 1`),
                             soldQuantity: sequelize.literal(`soldQuantity - 1`),
@@ -215,6 +242,11 @@ export class OrderSaleService {
                         });
                     } else {
                         const packageItem = await PackageService.getPackageByPackageId(orderDetail.packageId);
+                        await OrderEsignDetail.update({orderStatus: EsignStatus.Cancel}, {
+                            where: {
+                                packageId: orderDetail.packageId,
+                            }, transaction: t
+                        })
                         await Fish.update({
                             remainQuantity: sequelize.literal(`remainQuantity + ${packageItem?.quantity}`),
                             soldQuantity: sequelize.literal(`soldQuantity - ${packageItem?.quantity}`),
@@ -224,6 +256,24 @@ export class OrderSaleService {
                                 fishId: packageItem?.fishId
                             }, transaction: t
                         });
+                        const orderEsignDetail = await OrderEsignDetail.findOne({
+                            where: {
+                                packageId: orderDetail.packageId,
+                            }
+                        })
+                        if (!orderEsignDetail) {
+                            await t.rollback();
+                            return;
+                        }
+                        orderEsignDetail.orderStatus = EsignStatus.Cancel
+                        await OrderEsign.update({
+                            status: EsignStatus.Cancel
+                        }, {
+                            where: {
+                                orderEsignId: orderEsignDetail.orderEsignId
+                            }
+                        })
+                        await orderEsignDetail.save({transaction: t})
 
                     }
                 }
