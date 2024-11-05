@@ -549,3 +549,30 @@ export const getAllOrderEsignByBuyer = async (req: AuthRequest, res: Response, n
     }
 }
 
+export const checkPriceForNewOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const {receiveDate, expireDate, weight} = req.body;
+        console.log(1111111111111111111111)
+
+        console.log(receiveDate, expireDate, weight)
+
+        if (!receiveDate || !expireDate || !weight) {
+            badRequest(res, "Input data not enough");
+        }
+
+
+        let totalPrice = 0
+        let count = countDate(receiveDate, expireDate);
+        const typeOfFish = estimateTypeFish(weight);
+        console.log(typeOfFish, count)
+        const getFee = await FeeService.getById(typeOfFish);
+        console.log(count, ">>>>>>>>>>>>>>>>")
+        totalPrice = (getFee!.feed * count + getFee!.careFeed * count + getFee!.other) * 10000;
+        ok(res, "Get price ok!", {totalPrice})
+
+    } catch (e) {
+        next(e);
+    }
+}
+
+

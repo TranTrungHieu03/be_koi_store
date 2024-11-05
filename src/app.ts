@@ -47,5 +47,5 @@ app.use(errorHandlingMiddleware);
     }
 })();
 
-// orderCron();
+orderCron();
 export default app;
