@@ -37,6 +37,14 @@ export const autoCreateFee = async (req: Request, res: Response, next: NextFunct
                 careEsign: 7,
                 other: 20,
                 healthCheck: 50
+            },
+            {
+                fishType: 5,
+                feed: 3,
+                careFeed: 2,
+                careEsign: 1,
+                other: 3,
+                healthCheck: 2
             }
         ];
         for (let fee of data) {
