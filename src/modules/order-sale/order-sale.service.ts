@@ -201,6 +201,10 @@ export class OrderSaleService {
                 ]
             },);
             console.log(ordersToCancel)
+            if (ordersToCancel.length === 0){
+                await t.rollback();
+                return;
+            }
             for (let order of ordersToCancel) {
 
                 const orderDetails = order.orderDetails;
